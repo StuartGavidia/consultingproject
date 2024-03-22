@@ -1,0 +1,6 @@
+---
+title: "Final Consulting Project Proposal"
+output: html_notebook
+names: Abby Winkler, Andrew Sandoval, Kirill Perfiliev, Stuart Gavidia
+---
+### By: Abby Winkler, Andrew Sandoval, Kirill Perfiliev, Stuart Gavidia
