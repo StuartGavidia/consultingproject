@@ -1,6 +1,32 @@
 ---
 title: "Final Consulting Project Proposal"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 names: Abby Winkler, Andrew Sandoval, Kirill Perfiliev, Stuart Gavidia
 ---
 ### By: Abby Winkler, Andrew Sandoval, Kirill Perfiliev, Stuart Gavidia
+
+## Part 1: Group Member Proposal
+1. Group Size 4
+
+2. Abby Winkler (abby.winkler@plu.edu) , Andrew Sandoval (asandoval@plu.edu), Kirill Perfiliev (kperfiliev@plu.edu), Stuart Gavidia (gavidisa@plu.edu).
+
+3. Meeting times are on Tuesdays (1245-1345) and Fridays (1335-1435)
+
+## Part 2: Project Topic Proposal
+
+4. Projet is based on measuring hand hygiene compliance and it's effect on central-line associated bloodstream infections (CLABSI) at Windhoek Central Hospital NICU.
+
+5. This study aims to investigate the effect on neonatal infection rates in Windhoek
+Central Hospital (WCH), Namibia, by instituting an educational module to improve adherence to
+the “Five Moments of Hand Hygiene” (Namibian Ministry of Health and Social Services) from
+August 2022 to September 2023. It is hypothesized that increased adherence to the “5 moments&#39;&#39;
+will decrease central line-associated bloodstream infection (CLABSI) rates in the WCH NICU.
+
+
+
+6. b. Getting from Elizabeth Larios and the data is coming from Windhoek
+Central Hospital (WCH), Namibia. 
+
+7. Dr. Justice will connect us with Elizabeth.
