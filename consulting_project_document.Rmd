@@ -1,0 +1,74 @@
+---
+title: "Final Consulting Project with Elizabeth Larios"
+author: "Abby, Andrew, Kirill, Stuart"
+date: "2024-05-06"
+output: html_document
+runtime: shiny
+---
+
+## Load packages
+```{r, message=FALSE, warning=FALSE}
+library(shiny)
+library(shinydashboard)
+```
+
+## Interactive Application
+```{r, echo=FALSE}
+
+working_clabsi_data <- read.csv("working_clabsi_data_2023.csv")
+unique(working_clabsi_data$SourceName)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Windhoek Central Hospital NICU Data"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+      menuItem("CLABSI Rates", tabName = "clabsi_rates", icon = icon("chart-line"))
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "dashboard",
+        fluidRow(
+          box(title = "Welcome to our analysis of the WCH NICU Data", status = "primary", solidHeader = TRUE,
+            "Our goal is to analyze the data and answer these research questions: ",
+            
+            "1. What is the baseline CLABSI infection rate in the WCH NICU for the last 5
+years (pre intervention)? What is the CLABSI infection rate after
+intervention?
+            2. What is the baseline hand hygiene compliance rate of WCH NICU nurses?
+What is the hand hygiene compliance rate after intervention?
+
+            3. Does increased hand hygiene compliance correlate to decreased CLABSI
+infection rates? In other words, did the intervention work, is my hypothesis
+correct?
+            4. Does knowledge, perception, and attitude surrounding hand
+hygiene/infection control actually improve compliance to those
+practices? Can you have good knowledge but suboptimal practice?
+Can you have poor knowledge and have optimal practice?"
+          )
+        )
+      ),
+      tabItem(tabName = "clabsi_rates",
+        fluidRow(
+          box(title = "CLABSI Rates Before Intervention", status = "warning", plotOutput("plotPre")),
+            box(title = "CLABSI Rates After Intervention", status = "warning", plotOutput("plotPost"))
+        )
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$plotPre <- renderPlot({
+    
+  })
+  output$plotPost <- renderPlot({
+    
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+## More Graphs
