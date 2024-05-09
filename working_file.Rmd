@@ -1,0 +1,170 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+```
+
+
+#initial filter for cath tip and cvp
+```{r}
+data <- read.csv("working_clabsi_data_2023.csv")
+unique(data$SourceName)
+
+
+filtered_data <- data %>%
+  filter(grepl("CVP LINE|CATHETER TIP|TIP", SourceName))
+
+unique(filtered_data$SourceName)
+
+
+```
+
+
+#filter based on data
+```{r}
+
+pre_inter_data <- filtered_data %>%
+  filter(as.Date(Collection.Date, "%m/%d/%Y") >= as.Date("2023-03-08") &
+         as.Date(Collection.Date, "%m/%d/%Y") <= as.Date("2023-05-17"))
+
+
+post_inter_data <- filtered_data %>%
+  filter(as.Date(Collection.Date, "%m/%d/%Y") >= as.Date("2023-08-01") &
+         as.Date(Collection.Date, "%m/%d/%Y") <= as.Date("2023-10-14"))
+
+
+```
+
+
+#adding another column for yes and no to bacteria growth
+```{r}
+bac_pre_inter_data <- pre_inter_data %>%
+  mutate(Bacterial_Growth = ifelse(OrganismName == "No bacterial growth", "No", "Yes"))
+
+unique(bac_pre_inter_data$SourceName)
+
+
+bac_post_inter_data <- post_inter_data %>%
+  mutate(Bacterial_Growth = ifelse(OrganismName == "No bacterial growth", "No", "Yes"))
+
+unique(bac_post_inter_data$SourceName)
+
+
+```
+
+
+#getting proportions
+```{r}
+
+pre_summary_table <- table(bac_pre_inter_data$Bacterial_Growth)
+
+pre_proportion_yes <- pre_summary_table[["Yes"]] / sum(pre_summary_table)
+
+
+
+post_summary_table <- table(bac_post_inter_data$Bacterial_Growth)
+
+post_proportion_yes <- post_summary_table[["Yes"]] / sum(post_summary_table)
+
+
+pre_proportion_yes
+post_proportion_yes
+
+```
+
+
+#graph the results
+```{r}
+pre_proportions <- bac_pre_inter_data %>%
+  group_by(SourceName, Bacterial_Growth) %>%
+  summarise(count = n()) %>%
+  mutate(pre_prop = count / sum(count))
+
+# Create the plot
+ggplot(pre_proportions, aes(x = SourceName, y = pre_prop, fill = Bacterial_Growth)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Pre-Interventions Proportion of Bacterial Growth by SourceName",
+       y = "Proportion",
+       x = "SourceName",
+       fill = "Bacterial Growth")
+
+
+```
+
+
+```{r}
+post_proportions <- bac_post_inter_data %>%
+  group_by(SourceName, Bacterial_Growth) %>%
+  summarise(count = n()) %>%
+  mutate(post_prop = count / sum(count))
+
+# Create the plot
+ggplot(post_proportions, aes(x = SourceName, y = post_prop, fill = Bacterial_Growth)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Post-Interventions Proportion of Bacterial Growth by SourceName",
+       y = "Proportion",
+       x = "SourceName",
+       fill = "Bacterial Growth")
+
+
+```
+
+
+
+```{r}
+bac_pre_inter_data$Collection.Date <- as.Date(bac_pre_inter_data$Collection.Date, format = "%m/%d/%Y")
+
+
+# Calculate proportions
+pre_proportions <- bac_pre_inter_data %>%
+  group_by(Collection.Date, Bacterial_Growth) %>%
+  summarise(count = n()) %>%
+  mutate(pre_prop = count / sum(count))
+
+
+# Create the plot
+ggplot(pre_proportions, aes(x = Collection.Date, y = pre_prop, color = Bacterial_Growth)) +
+  geom_line() +
+  labs(title = "Pre-Interventions Proportion of Bacterial Growth Over Time",
+       y = "Proportion",
+       x = "Collection Date",
+       color = "Bacterial Growth")
+
+```
+
+
+
+```{r}
+bac_post_inter_data$Collection.Date <- as.Date(bac_post_inter_data$Collection.Date, format = "%m/%d/%Y")
+
+
+# Calculate proportions
+post_proportions <- bac_post_inter_data %>%
+  group_by(Collection.Date, Bacterial_Growth) %>%
+  summarise(count = n()) %>%
+  mutate(post_prop = count / sum(count))
+
+
+# Create the plot
+ggplot(post_proportions, aes(x = Collection.Date, y = post_prop, color = Bacterial_Growth)) +
+  geom_line() +
+  labs(title = "Post-Interventions Proportion of Bacterial Growth Over Time",
+       y = "Proportion",
+       x = "Collection Date",
+       color = "Bacterial Growth")
+
+```
+
+
+
+
+
+
