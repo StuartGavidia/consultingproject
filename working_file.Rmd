@@ -46,6 +46,7 @@ post_inter_data <- filtered_data %>%
 
 #adding another column for yes and no to bacteria growth
 ```{r}
+
 bac_pre_inter_data <- pre_inter_data %>%
   mutate(Bacterial_Growth = ifelse(OrganismName == "No bacterial growth", "No", "Yes"))
 
@@ -162,6 +163,88 @@ ggplot(post_proportions, aes(x = Collection.Date, y = post_prop, color = Bacteri
        color = "Bacterial Growth")
 
 ```
+
+
+
+
+```{r}
+bac_both_inter_data <- filtered_data %>%
+  mutate(Bacterial_Growth = ifelse(OrganismName == "No bacterial growth", "No", "Yes"))
+
+unique(bac_both_inter_data$SourceName)
+
+
+
+
+both_summary_table <- table(bac_both_inter_data$Bacterial_Growth)
+
+both_proportion_yes <- both_summary_table[["Yes"]] / sum(both_summary_table)
+
+both_proportion_yes
+
+
+
+
+both_proportions <- bac_both_inter_data %>%
+  group_by(SourceName, Bacterial_Growth) %>%
+  summarise(count = n()) %>%
+  mutate(both_prop = count / sum(count))
+
+# Create the plot
+ggplot(both_proportions, aes(x = SourceName, y = both_prop, fill = Bacterial_Growth)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Both-Interventions Proportion of Bacterial Growth by SourceName",
+       y = "Proportion",
+       x = "SourceName",
+       fill = "Bacterial Growth")
+
+
+
+
+
+
+bac_both_inter_data$Collection.Date <- as.Date(bac_both_inter_data$Collection.Date, format = "%m/%d/%Y")
+
+
+# Calculate proportions
+both_proportions <- bac_both_inter_data %>%
+  group_by(Collection.Date, Bacterial_Growth) %>%
+  summarise(count = n()) %>%
+  mutate(both_prop = count / sum(count))
+
+
+# Create the plot
+ggplot(both_proportions, aes(x = Collection.Date, y = both_prop, color = Bacterial_Growth)) +
+  geom_line() +
+  labs(title = "Both-Interventions Proportion of Bacterial Growth Over Time",
+       y = "Proportion",
+       x = "Collection Date",
+       color = "Bacterial Growth")
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
