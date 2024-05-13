@@ -18,12 +18,10 @@ library(tidyr)
 data <- read.csv("working_clabsi_data_2023.csv")
 unique(data$SourceName)
 
-
 filtered_data <- data %>%
   filter(grepl("CVP LINE|CATHETER TIP|TIP", SourceName))
 
 unique(filtered_data$SourceName)
-
 
 ```
 
@@ -32,14 +30,13 @@ unique(filtered_data$SourceName)
 ```{r}
 
 pre_inter_data <- filtered_data %>%
-  filter(as.Date(Collection.Date, "%m/%d/%Y") >= as.Date("2023-03-08") &
-         as.Date(Collection.Date, "%m/%d/%Y") <= as.Date("2023-05-17"))
+  filter(as.Date(Collection.Date, "%m/%d/%y") >= as.Date("2023-03-08") &
+         as.Date(Collection.Date, "%m/%d/%y") <= as.Date("2023-05-17"))
 
 
 post_inter_data <- filtered_data %>%
-  filter(as.Date(Collection.Date, "%m/%d/%Y") >= as.Date("2023-08-01") &
-         as.Date(Collection.Date, "%m/%d/%Y") <= as.Date("2023-10-14"))
-
+  filter(as.Date(Collection.Date, "%m/%d/%y") >= as.Date("2023-08-01") &
+         as.Date(Collection.Date, "%m/%d/%y") <= as.Date("2023-10-14"))
 
 ```
 
