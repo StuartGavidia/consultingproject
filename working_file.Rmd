@@ -219,7 +219,15 @@ ggplot(both_proportions, aes(x = Collection.Date, y = both_prop, color = Bacteri
   labs(title = "Both-Interventions Proportion of Bacterial Growth Over Time",
        y = "Proportion",
        x = "Collection Date",
-       color = "Bacterial Growth")
+       color = "Bacterial Growth")+
+  
+  # Add dashed lines for the three time periods
+  geom_vline(xintercept = as.numeric(as.Date("2023-03-08")), linetype = "dashed", color = "blue", size = 0.8) +
+  geom_vline(xintercept = as.numeric(as.Date("2023-05-17")), linetype = "dashed", color = "blue", size = 0.8) +
+  geom_vline(xintercept = as.numeric(as.Date("2023-07-03")), linetype = "dashed", color = "purple", size = 0.8) +
+  geom_vline(xintercept = as.numeric(as.Date("2023-07-21")), linetype = "dashed", color = "purple", size = 0.8) +
+  geom_vline(xintercept = as.numeric(as.Date("2023-08-01")), linetype = "dashed", color = "black", size = 0.8) +
+  geom_vline(xintercept = as.numeric(as.Date("2023-10-14")), linetype = "dashed", color = "black", size = 0.8)
 
 
 
