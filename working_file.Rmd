@@ -63,12 +63,12 @@ unique(bac_post_inter_data$SourceName)
 ```{r}
 
 pre_summary_table <- table(bac_pre_inter_data$Bacterial_Growth)
+pre_summary_table
 
 pre_proportion_yes <- pre_summary_table[["Yes"]] / sum(pre_summary_table)
 
-
-
 post_summary_table <- table(bac_post_inter_data$Bacterial_Growth)
+post_summary_table
 
 post_proportion_yes <- post_summary_table[["Yes"]] / sum(post_summary_table)
 

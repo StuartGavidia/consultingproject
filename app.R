@@ -71,7 +71,10 @@ tabItem(tabName = "perception_survey",
         ),
         fluidRow(
           box(title = "Comparing Average Nurse Survey Responses to Value of Assigned to Hand Hygiene Pre and Post Intervention On a Scale of 1-7", status = "warning", tableOutput("tableNursesSurveyValue"), width = 12)
-        )
+        ),
+        fluidRow(
+          box(title = "Hand Hygiene Plot", status = "warning", plotOutput("plotHH"), width = 12)
+        ),
       )
     )
   )
@@ -84,7 +87,7 @@ generate_graph <- function(categories, opportunities, HR, HW, title, x_label) {
   data <- data.frame(category = categories, HR = HR_pct, HW = HW_pct)
   data_long <- melt(data, id.vars = "category", variable.name = "Type", value.name = "Percentage")
   
-  plot <- ggplot(data_long, aes(x = reorder(category, -Percentage), y = Percentage, fill = Type)) +
+  plot <- ggplot(data_long, aes(x = category, y = Percentage, fill = Type)) +
     geom_bar(stat = "identity", position = "stack", width = 0.5) +
     labs(title = title,
          x = x_label,
@@ -153,7 +156,8 @@ post_proportion_yes <- post_summary_table[["Yes"]] / sum(post_summary_table)
 
 pre_proportions <- bac_pre_inter_data %>%
   group_by(SourceName, Bacterial_Growth) %>%
-  summarise(count = n()) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  complete(SourceName, Bacterial_Growth, fill = list(count = 0)) %>%
   mutate(pre_prop = count / sum(count))
 
 pre_proportions_plot <- ggplot(pre_proportions, aes(x = SourceName, y = pre_prop, fill = Bacterial_Growth)) +
@@ -165,7 +169,8 @@ pre_proportions_plot <- ggplot(pre_proportions, aes(x = SourceName, y = pre_prop
 
 post_proportions <- bac_post_inter_data %>%
   group_by(SourceName, Bacterial_Growth) %>%
-  summarise(count = n()) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  complete(SourceName, Bacterial_Growth, fill = list(count = 0)) %>%
   mutate(post_prop = count / sum(count))
 
 post_proportions_plot <- ggplot(post_proportions, aes(x = SourceName, y = post_prop, fill = Bacterial_Growth)) +
@@ -197,7 +202,8 @@ both_proportion_yes <- both_summary_table[["Yes"]] / sum(both_summary_table)
 
 both_proportions <- bac_both_inter_data %>%
   group_by(SourceName, Bacterial_Growth) %>%
-  summarise(count = n()) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  complete(SourceName, Bacterial_Growth, fill = list(count = 0)) %>%
   mutate(both_prop = count / sum(count))
 
 both_proportions_plot <- ggplot(both_proportions, aes(x = SourceName, y = both_prop, fill = Bacterial_Growth)) +
@@ -226,6 +232,15 @@ nurses_perception_HH <- read.csv("./nurses_perception_HH.csv", check.names = FAL
 nurses_survey_efficacy <- read.csv("./nurses_survey_efficacy.csv", check.names = FALSE)
 nurses_survey_HH <- read.csv("./nurses_survey_HH.csv", check.names = FALSE)
 nurses_survey_value <- read.csv("./nurses_survey_value.csv", check.names = FALSE)
+
+# code for HH plot
+hh <- read.csv("./HHPerception_Reality.csv")
+numeric_cols <- Filter(is.numeric, hh)
+averages <- colMeans(numeric_cols, na.rm = TRUE)
+colors <- c("#F4A582", "#4393C3", "#F4A582", "#4393C3")
+
+# code for T test
+
 
 server <- function(input, output) {
   output$plotPreCLABSI <- renderPlot({
@@ -265,6 +280,21 @@ server <- function(input, output) {
 
   output$tableNursesSurveyValue <- renderTable({
     nurses_survey_value
+  })
+  
+  output$plotHH <- renderPlot({
+    barplot(averages,
+            main = "Average Hand Hygiene Perceived And Actual Compliance Rates Across Nurses",
+            xlab = "Time of Survey and Sample",
+            ylab = "Average Percentage of Hand Hygiene Compliance",
+            col = colors,
+            border = "black",
+            ylim = c(0, max(averages)*1.2), 
+            las = 1)
+    
+    bar_centers <- barplot(averages, plot = FALSE)
+    rounded_values <- round(averages, digits = 2)
+    text(x = bar_centers, y = averages, labels = paste0(rounded_values, "%"), pos = 3, cex = 0.8, col = "black")
   })
 
 }
