@@ -1,5 +1,5 @@
 ---
-title: "Final Consulting Project with Elizabeth Larios"
+title: "Consulting Project Written Report with Elizabeth Larios"
 author: "Abby, Andrew, Kirill, Stuart"
 date: "2024-05-06"
 output: html_document
@@ -27,24 +27,218 @@ library(tidyr)
 
 ## Hand Hygiene Rates
 ```{r}
+generate_graph <- function(categories, opportunities, HR, HW, title, x_label) {
+  HR_pct <- HR / opportunities * 100
+  HW_pct <- HW / opportunities * 100
+  data <- data.frame(category = categories, HR = HR_pct, HW = HW_pct)
+  data_long <- melt(data, id.vars = "category", variable.name = "Type", value.name = "Percentage")
+  
+  plot <- ggplot(data_long, aes(x = category, y = Percentage, fill = Type)) +
+    geom_bar(stat = "identity", position = "stack", width = 0.5) +
+    labs(title = title,
+         x = x_label,
+         y = "% of Opportunities Seized",
+         fill = "Type") +
+    theme_minimal() + 
+    scale_fill_manual(values = c("purple", "blue")) + 
+    scale_y_continuous(limits = c(0, 100))
+  
+  return(plot)
+}
 
+wards <- c("ICU", "High Care", "Baby Room", "Baby Bed", "Isolation")
+opportunities_ward_pre <- c(152, 146, 10, 254, 75)
+HR_ward_pre <- c(19, 32, 4, 57, 25)
+HW_ward_pre <- c(16, 5, 0, 13, 16)
+
+opportunities_ward_post <- c(227, 288, 125, 83, 16)
+HR_ward_post <- c(57, 75, 21, 41, 5)
+HW_ward_post <- c(5, 15, 15, 2, 3)
+
+pre_HH_ward_graph <- generate_graph(wards, opportunities_ward_pre, HR_ward_pre, HW_ward_pre, "Pre intervention", "Ward")
+post_HH_ward_graph <- generate_graph(wards, opportunities_ward_post, HR_ward_post, HW_ward_post, "Post intervention", "Ward")
+
+ward_plot <- plot_grid(pre_HH_ward_graph, post_HH_ward_graph, ncol = 2, nrow = 1)
+
+five_moments <- c("BFTAP", "BCAP", "ABFER", "ATAP", "ATPS")
+opportunities_5M_pre <- c(166, 110, 55, 148, 158)
+HR_5M_pre <- c(25, 17, 17, 41, 37)
+HW_5M_pre <- c(9, 6, 5, 10, 20)
+
+opportunities_5M_post <- c(184, 163, 55, 166, 171)
+HR_5M_post <- c(42, 36, 23, 50, 48)
+HW_5M_post <- c(6, 3,7, 10, 14)
+
+pre_HH_5M_graph <- generate_graph(five_moments, opportunities_5M_pre, HR_5M_pre, HW_5M_pre, "Pre intervention", "5 Moments")
+post_HH_5M_graph <- generate_graph(five_moments, opportunities_5M_post, HR_5M_post, HW_5M_post, "Post intervention", "5 Moments")
+
+indication_plot <- plot_grid(pre_HH_5M_graph, post_HH_5M_graph, ncol = 2, nrow = 1)
+
+ward_plot
+indication_plot
 ```
 
 
-## Hand Hygiene Perception Changes
+## Hand Hygiene Perception Graph
 ```{r}
+## Hand hygiene graph percieved vs actual compliance rates
+hh <- read.csv("./HHPerception_Reality.csv")
+hhnew <- hh[,c(2:5)] 
+numeric_cols <- Filter(is.numeric, hhnew)
+averages <- colMeans(numeric_cols, na.rm = TRUE)
+colors <- c("#F4A582", "#4393C3", "#F4A582", "#4393C3")
+barplot(averages,
+        main = "Average Hand Hygiene Perceived And Actual Compliance Rates Across Nurses",
+        xlab = "Time of Survey and Sample",
+        ylab = "Average Percentage of Hand Hygiene Compliance",
+        col = colors,
+        border = "black",
+        ylim = c(0, max(averages)*1.2), 
+        las = 1)
 
+bar_centers <- barplot(averages, plot = FALSE)
+rounded_values <- round(averages, digits = 2)
+text(x = bar_centers, y = averages, labels = paste0(rounded_values, "%"), pos = 3, cex = 0.8, col = "black")
+
+prop.test(c(187,239),c(637,739), alternative="less", conf.level = .95)
 ```
 
+## Hand Hygiene Perception Survey
+```{r, warning=FALSE}
+nurses_perception_HH <- read.csv("./nurses_perception_HH.csv", check.names = FALSE)
+nurses_survey_efficacy <- read.csv("./nurses_survey_efficacy.csv", check.names = FALSE)
+nurses_survey_HH <- read.csv("./nurses_survey_HH.csv", check.names = FALSE)
+nurses_survey_value <- read.csv("./nurses_survey_value.csv", check.names = FALSE)
+
+nurses_perception_HH
+nurses_survey_efficacy
+nurses_survey_HH
+nurses_survey_value
+```
 
 ## CLABSI Graphs
 ```{r}
+# code for clabsi tab
+data <- read.csv("working_clabsi_data_2023.csv")
 
+filtered_data <- data %>%
+  filter(grepl("CVP LINE|CATHETER TIP|TIP", SourceName))
+
+pre_inter_data <- filtered_data %>%
+  filter(as.Date(Collection.Date, "%m/%d/%y") >= as.Date("2023-03-08") &
+           as.Date(Collection.Date, "%m/%d/%y") <= as.Date("2023-05-17"))
+
+post_inter_data <- filtered_data %>%
+  filter(as.Date(Collection.Date, "%m/%d/%y") >= as.Date("2023-08-01") &
+           as.Date(Collection.Date, "%m/%d/%y") <= as.Date("2023-10-14"))
+
+bac_pre_inter_data <- pre_inter_data %>%
+  mutate(Bacterial_Growth = ifelse(OrganismName == "No bacterial growth", "No", "Yes"))
+
+bac_post_inter_data <- post_inter_data %>%
+  mutate(Bacterial_Growth = ifelse(OrganismName == "No bacterial growth", "No", "Yes"))
+
+pre_summary_table <- table(bac_pre_inter_data$Bacterial_Growth)
+pre_proportion_yes <- pre_summary_table[["Yes"]] / sum(pre_summary_table)
+
+post_summary_table <- table(bac_post_inter_data$Bacterial_Growth)
+post_proportion_yes <- post_summary_table[["Yes"]] / sum(post_summary_table)
+
+pre_proportions <- bac_pre_inter_data %>%
+  group_by(SourceName, Bacterial_Growth) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  complete(SourceName, Bacterial_Growth, fill = list(count = 0)) %>%
+  mutate(pre_prop = count / sum(count))
+
+pre_proportions_plot <- ggplot(pre_proportions, aes(x = SourceName, y = pre_prop, fill = Bacterial_Growth)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Pre-Interventions Proportion of Bacterial Growth by SourceName",
+       y = "Proportion",
+       x = "SourceName",
+       fill = "Bacterial Growth")
+
+pre_proportions_plot
+
+post_proportions <- bac_post_inter_data %>%
+  group_by(SourceName, Bacterial_Growth) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  complete(SourceName, Bacterial_Growth, fill = list(count = 0)) %>%
+  mutate(post_prop = count / sum(count))
+
+post_proportions_plot <- ggplot(post_proportions, aes(x = SourceName, y = post_prop, fill = Bacterial_Growth)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Post-Interventions Proportion of Bacterial Growth by SourceName",
+       y = "Proportion",
+       x = "SourceName",
+       fill = "Bacterial Growth")
+
+post_proportions_plot
+
+bac_pre_inter_data$Collection.Date <- as.Date(bac_pre_inter_data$Collection.Date, format = "%m/%d/%Y")
+
+pre_proportions <- bac_pre_inter_data %>%
+  group_by(Collection.Date, Bacterial_Growth) %>%
+  summarise(count = n()) %>%
+  mutate(pre_prop = count / sum(count))
+
+bac_post_inter_data$Collection.Date <- as.Date(bac_post_inter_data$Collection.Date, format = "%m/%d/%Y")
+
+post_proportions <- bac_post_inter_data %>%
+  group_by(Collection.Date, Bacterial_Growth) %>%
+  summarise(count = n()) %>%
+  mutate(post_prop = count / sum(count))
+
+bac_both_inter_data <- filtered_data %>%
+  mutate(Bacterial_Growth = ifelse(OrganismName == "No bacterial growth", "No", "Yes"))
+
+both_summary_table <- table(bac_both_inter_data$Bacterial_Growth)
+both_proportion_yes <- both_summary_table[["Yes"]] / sum(both_summary_table)
+
+both_proportions <- bac_both_inter_data %>%
+  group_by(SourceName, Bacterial_Growth) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  complete(SourceName, Bacterial_Growth, fill = list(count = 0)) %>%
+  mutate(both_prop = count / sum(count))
+
+both_proportions_plot <- ggplot(both_proportions, aes(x = SourceName, y = both_prop, fill = Bacterial_Growth)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Both-Interventions Proportion of Bacterial Growth by SourceName",
+       y = "Proportion",
+       x = "SourceName",
+       fill = "Bacterial Growth")
+
+both_proportions_plot
+
+bac_both_inter_data$Collection.Date <- as.Date(bac_both_inter_data$Collection.Date, format = "%m/%d/%Y")
+
+both_proportions <- bac_both_inter_data %>%
+  group_by(Collection.Date, Bacterial_Growth) %>%
+  summarise(count = n()) %>%
+  mutate(both_prop = count / sum(count))
+
+both_proportions_line_plot <- ggplot(both_proportions, aes(x = Collection.Date, y = both_prop, color = Bacterial_Growth)) +
+  geom_line() +
+  labs(title = "Both-Interventions Proportion of Bacterial Growth Over Time",
+       y = "Proportion",
+       x = "Collection Date",
+       color = "Bacterial Growth")
+
+both_proportions_line_plot
 ```
 
+## Ethical Considerations
+* Ensuring anonymity of Nurses
+* Making sure our graphs are not misrepresenting the data
+* Being transparent with findings
+* Being mindful and aware of possible external factors that could have affected data collection and anaylsis
 
+## Main Challenges
+* Sorting the CLABSI data
+* Link CLABSI data cases to a specific nurse
+* Health Terms
+* Generating graphs based on a timeline
 
-## Shiny App
+## Shiny App that encompasses all graphs
 ```{r, echo=FALSE, warning=FALSE}
 ui <- dashboardPage(
   dashboardHeader(title = "Windhoek Central Hospital NICU Data"),
@@ -341,5 +535,3 @@ server <- function(input, output) {
 
 shinyApp(ui = ui, server = server)
 ```
-
-## More Graphs
